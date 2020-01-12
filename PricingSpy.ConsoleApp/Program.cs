@@ -25,6 +25,11 @@ namespace PricingSpy.ConsoleApp
               "The result goes to the Console.",
               CommandOptionType.NoValue);
 
+            CommandOption productsFileOption = commandLineApplication.Option(
+                "-file <productsFileOption>",
+                "Products file path.",
+                CommandOptionType.SingleValue);
+
             CommandOption telegramOption = commandLineApplication.Option(
               "-telegram",
               "The result goes to the Telegram.",
@@ -44,14 +49,20 @@ namespace PricingSpy.ConsoleApp
 
             commandLineApplication.OnExecute(async () =>
             {
+                if (!productsFileOption.HasValue())
+                {
+                    Console.WriteLine("Specify the file path with the Products to search!");
+                    return 0;
+                }
+
                 if (!consoleOption.HasValue() && !telegramOption.HasValue())
                 {
-                    Console.WriteLine($"Notifier type not found! Possible values: '-console' or '-telegram'.");
+                    Console.WriteLine("Notifier type not found! Possible values: '-console' or '-telegram'.");
                     return 0;
                 }
 
                 var productsInfoRequest = JsonSerializer.Deserialize<ProductInfoRequest[]>(
-                    File.ReadAllText("products.json"),
+                    File.ReadAllText(productsFileOption.Value()),
                     new JsonSerializerOptions()
                     {
                         PropertyNameCaseInsensitive = true
